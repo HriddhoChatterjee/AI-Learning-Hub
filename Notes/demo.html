@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Markdown Notes - Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .demo-notice {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .demo-notice h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .demo-notice p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .setup-steps {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .setup-steps ol {
+            text-align: left;
+            color: #333;
+        }
+
+        .setup-steps li {
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-header h2 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-content {
+            padding: 20px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        textarea, .summary-content {
+            flex: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .summary-content {
+            background: #f8f9fa;
+            white-space: pre-wrap;
+            overflow-y: auto;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+
+        .markdown-guide {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .markdown-guide h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .markdown-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            color: white;
+        }
+
+        .markdown-examples div {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .toolbar {
+                justify-content: center;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-sticky-note"></i> AI-Driven Markdown Notes</h1>
+            <p>Write beautiful markdown notes and get AI-powered summaries</p>
+        </div>
+
+        <div class="demo-notice">
+            <h3><i class="fas fa-info-circle"></i> Demo Mode</h3>
+            <p>This is a demo version. To use AI summarization, you need to set up the backend server.</p>
+            <div class="setup-steps">
+                <ol>
+                    <li>Get an OpenAI API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a></li>
+                    <li>Set the environment variable:
+                        <div class="code-block">export OPENAI_API_KEY="your-api-key-here"</div>
+                    </li>
+                    <li>Run the web application:
+                        <div class="code-block">python run_web.py</div>
+                    </li>
+                    <li>Open <a href="http://localhost:5000">http://localhost:5000</a> in your browser</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-edit"></i> Markdown Notes</h2>
+                    <div class="toolbar">
+                        <button class="btn btn-success" onclick="demoSummarize()">
+                            <i class="fas fa-magic"></i> Demo Summarize
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearNotes()">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                        <button class="btn btn-secondary" onclick="saveNotes()">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadNotes()">
+                            <i class="fas fa-folder-open"></i> Load
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <textarea id="notesInput" placeholder="Write your markdown notes here...
+
+# Machine Learning Fundamentals
+
+## Introduction
+Machine learning is a subset of artificial intelligence that enables computers to learn from data without being explicitly programmed.
+
+## Key Concepts
+
+### Supervised Learning
+- **Definition**: Learning from labeled training data
+- **Examples**: Classification, Regression
+- **Algorithms**: Linear Regression, Decision Trees, Neural Networks
+
+### Unsupervised Learning
+- **Definition**: Finding patterns in unlabeled data
+- **Examples**: Clustering, Dimensionality Reduction
+- **Algorithms**: K-Means, PCA, Autoencoders
+
+## Applications
+- Image recognition
+- Natural language processing
+- Recommendation systems
+- Autonomous vehicles"></textarea>
+                    <div id="notesStatus" class="status"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-brain"></i> AI Summary</h2>
+                    <button class="btn btn-danger" onclick="clearSummary()">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+                <div class="panel-content">
+                    <div id="summaryContent" class="summary-content">Your AI-generated summary will appear here...
+
+Demo Summary:
+• Machine learning enables computers to learn from data without explicit programming
+• Key concepts include supervised learning (labeled data) and unsupervised learning (patterns in unlabeled data)
+• Applications span image recognition, NLP, recommendations, and autonomous vehicles
+• Core algorithms include linear regression, decision trees, neural networks, K-means, and PCA</div>
+                    <div id="summaryStatus" class="status"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="markdown-guide">
+            <h3><i class="fas fa-question-circle"></i> Markdown Quick Guide</h3>
+            <div class="markdown-examples">
+                <div>
+                    <strong>Headers:</strong><br>
+                    # H1<br>
+                    ## H2<br>
+                    ### H3
+                </div>
+                <div>
+                    <strong>Text:</strong><br>
+                    **bold**<br>
+                    *italic*<br>
+                    `code`
+                </div>
+                <div>
+                    <strong>Lists:</strong><br>
+                    - Item 1<br>
+                    - Item 2<br>
+                    1. Numbered
+                </div>
+                <div>
+                    <strong>Links:</strong><br>
+                    [text](url)<br>
+                    ![alt](image.jpg)
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 AI-Driven Markdown Notes. Built with Flask, OpenAI, and modern web technologies.</p>
+        </div>
+    </div>
+
+    <script>
+        const notesInput = document.getElementById('notesInput');
+        const summaryContent = document.getElementById('summaryContent');
+        const notesStatus = document.getElementById('notesStatus');
+        const summaryStatus = document.getElementById('summaryStatus');
+
+        function showStatus(element, message, type = 'info') {
+            element.textContent = message;
+            element.className = `status ${type}`;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        function demoSummarize() {
+            const notes = notesInput.value.trim();
+            if (!notes) {
+                showStatus(notesStatus, 'Please enter some notes to summarize', 'error');
+                return;
+            }
+
+            // Show loading state
+            summaryContent.innerHTML = '<div class="loading"></div> Generating demo summary...';
+            showStatus(summaryStatus, 'Generating demo summary...', 'info');
+
+            // Simulate API delay
+            setTimeout(() => {
+                const demoSummary = `Demo Summary:
+• This is a demonstration of the AI summarization feature
+• In the full version, this would be generated by OpenAI's GPT model
+• The summary would capture key points from your markdown notes
+• Features include bullet points, structured formatting, and concise content
+• To use the real AI feature, please set up your OpenAI API key and run the Flask server`;
+
+                summaryContent.textContent = demoSummary;
+                showStatus(summaryStatus, 'Demo summary generated! Set up API key for real AI summaries.', 'success');
+            }, 2000);
+        }
+
+        function clearNotes() {
+            notesInput.value = '';
+            showStatus(notesStatus, 'Notes cleared', 'info');
+        }
+
+        function clearSummary() {
+            summaryContent.textContent = 'Your AI-generated summary will appear here...';
+            showStatus(summaryStatus, 'Summary cleared', 'info');
+        }
+
+        function saveNotes() {
+            const notes = notesInput.value;
+            if (!notes.trim()) {
+                showStatus(notesStatus, 'No notes to save', 'error');
+                return;
+            }
+
+            const blob = new Blob([notes], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `notes_${new Date().toISOString().split('T')[0]}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showStatus(notesStatus, 'Notes saved successfully!', 'success');
+        }
+
+        function loadNotes() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.md,.txt';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        notesInput.value = e.target.result;
+                        showStatus(notesStatus, 'Notes loaded successfully!', 'success');
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Auto-save to localStorage
+        let autoSaveTimer;
+        notesInput.addEventListener('input', () => {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                localStorage.setItem('markdownNotes', notesInput.value);
+            }, 1000);
+        });
+
+        // Load from localStorage on page load
+        window.addEventListener('load', () => {
+            const savedNotes = localStorage.getItem('markdownNotes');
+            if (savedNotes) {
+                notesInput.value = savedNotes;
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveNotes();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        loadNotes();
+                        break;
+                    case 'Enter':
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            demoSummarize();
+                        }
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

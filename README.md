@@ -38,7 +38,6 @@ print(summary)
 
 ## Technologies Used
 
-- **Python**: Core programming language
 - **Natural Language Processing (NLP)**: For text analysis and summarization
 - **Machine Learning**: Algorithm-based summarization
 - **TensorFlow/PyTorch**: Deep learning frameworks

@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Markdown Notes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --border-color: #dee2e6;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .logo span {
+            color: var(--secondary-color);
+        }
+
+        .notes-list {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .note-item:hover {
+            background-color: #f0f2f5;
+        }
+
+        .note-item.active {
+            background-color: #e7f1ff;
+            border-color: var(--primary-color);
+        }
+
+        .note-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .new-note-btn {
+            margin: 1rem;
+            padding: 0.8rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .new-note-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .new-note-btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1rem 1.5rem;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-title-input {
+            border: none;
+            font-size: 1.5rem;
+            font-weight: 600;
+            width: 100%;
+            padding: 0.5rem;
+            color: var(--dark-color);
+            background-color: transparent;
+        }
+
+        .note-title-input:focus {
+            outline: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn i {
+            margin-right: 0.4rem;
+        }
+
+        .editor-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .editor-section, .preview-section, .ai-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            padding: 0.8rem 1rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-textarea {
+            flex: 1;
+            padding: 1.5rem;
+            border: none;
+            resize: none;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+        }
+
+        .preview-content, .ai-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .preview-content h1, .preview-content h2, .preview-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .preview-content h1 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.3rem;
+        }
+
+        .preview-content p {
+            margin-bottom: 1rem;
+        }
+
+        .preview-content ul, .preview-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preview-content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin-left: 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        .preview-content code {
+            background-color: #f1f3f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .preview-content pre {
+            background-color: #f1f3f5;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .preview-content pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .ai-prompt-controls {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .prompt-select {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6c757d;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .ai-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #adb5bd;
+        }
+
+        .ai-result {
+            display: none;
+        }
+
+        .ai-loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ai-summary {
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-summary h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-key-points ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-key-points li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .editor-container {
+                flex-direction: column;
+            }
+            
+            .editor-section, .preview-section, .ai-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                max-height: 33.33vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 30vh;
+            }
+            
+            .editor-section, .preview-section, .ai-section {
+                max-height: 23.33vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>AI<span>Notes</span></h1>
+            <p>Markdown + AI Summarization</p>
+        </div>
+        
+        <button class="new-note-btn" id="newNoteBtn">
+            <i class="fas fa-plus"></i> New Note
+        </button>
+        
+        <div class="notes-list" id="notesList">
+            <!-- Notes will be loaded here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <input type="text" class="note-title-input" id="noteTitle" placeholder="Note Title" value="Meeting Notes">
+            
+            <div class="action-buttons">
+                <button class="btn" id="saveNoteBtn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button class="btn btn-primary" id="summarizeBtn">
+                    <i class="fas fa-robot"></i> Summarize
+                </button>
+            </div>
+        </div>
+        
+        <div class="editor-container">
+            <!-- Editor Section -->
+            <div class="editor-section">
+                <div class="section-header">
+                    <span>Editor</span>
+                    <span class="word-count" id="wordCount">Words: 0</span>
+                </div>
+                <textarea class="editor-textarea" id="markdownEditor" placeholder="# Start writing your markdown here..."># Project Meeting Notes
+## Date: October 26, 2023
+## Attendees: John, Sarah, Alex, Maria
+
+### Agenda
+1. Project status update
+2. Q3 goals review
+3. Resource allocation for next quarter
+4. Upcoming deadlines
+
+### Key Discussion Points
+- **Project Alpha** is ahead of schedule by two weeks
+- **Project Beta** needs additional resources to meet the deadline
+- Client feedback has been overwhelmingly positive for the new UI
+
+### Action Items
+- [x] Finalize Q3 report by Friday
+- [ ] Schedule client demo for next week
+- [ ] Update project timeline based on new requirements
+- [ ] Research potential integration with new API
+
+### Important Notes
+> "We need to prioritize user experience improvements in the next sprint." - Sarah
+
+The team agreed that we should allocate more time to **testing and quality assurance** to reduce post-release bugs.
+
+### Next Meeting
+**Date:** November 2, 2023  
+**Time:** 10:00 AM EST  
+**Topics:** Q4 planning, budget review</textarea>
+            </div>
+            
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <div class="section-header">
+                    <span>Preview</span>
+                    <span><i class="fas fa-eye"></i></span>
+                </div>
+                <div class="preview-content" id="previewContent">
+                    <!-- Markdown preview will be rendered here -->
+                </div>
+            </div>
+            
+            <!-- AI Section -->
+            <div class="ai-section">
+                <div class="section-header">
+                    <span>AI Summary</span>
+                    <span><i class="fas fa-robot"></i></span>
+                </div>
+                
+                <div class="ai-prompt-controls">
+                    <select class="prompt-select" id="promptSelect">
+                        <option value="summary">Summarize Key Points</option>
+                        <option value="bullet">Bullet Point Summary</option>
+                        <option value="action">Extract Action Items</option>
+                        <option value="tl;dr">TL;DR Version</option>
+                        <option value="insights">Generate Insights</option>
+                    </select>
+                    <button class="btn btn-primary" id="generateBtn">
+                        <i class="fas fa-bolt"></i> Generate
+                    </button>
+                </div>
+                
+                <div class="ai-content">
+                    <div class="ai-placeholder" id="aiPlaceholder">
+                        <i class="fas fa-robot"></i>
+                        <h3>AI Summary Will Appear Here</h3>
+                        <p>Select a prompt type and click "Generate" to summarize your note with AI.</p>
+                    </div>
+                    
+                    <div class="ai-loading" id="aiLoading">
+                        <div class="spinner"></div>
+                        <p>AI is analyzing your note...</p>
+                    </div>
+                    
+                    <div class="ai-result" id="aiResult">
+                        <!-- AI summary will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample notes data
+        const sampleNotes = [
+            {
+                id: 1,
+                title: "Meeting Notes",
+                content: `# Project Meeting Notes
+## Date: October 26, 2023
+## Attendees: John, Sarah, Alex, Maria
+
+### Agenda
+1. Project status update
+2. Q3 goals review
+3. Resource allocation for next quarter
+4. Upcoming deadlines
+
+### Key Discussion Points
+- **Project Alpha** is ahead of schedule by two weeks
+- **Project Beta** needs additional resources to meet the deadline
+- Client feedback has been overwhelmingly positive for the new UI
+
+### Action Items
+- [x] Finalize Q3 report by Friday
+- [ ] Schedule client demo for next week
+- [ ] Update project timeline based on new requirements
+- [ ] Research potential integration with new API
+
+### Important Notes
+> "We need to prioritize user experience improvements in the next sprint." - Sarah
+
+The team agreed that we should allocate more time to **testing and quality assurance** to reduce post-release bugs.
+
+### Next Meeting
+**Date:** November 2, 2023  
+**Time:** 10:00 AM EST  
+**Topics:** Q4 planning, budget review`,
+                date: "2023-10-26",
+                summary: ""
+            },
+            {
+                id: 2,
+                title: "Research Ideas",
+                content: `# AI Research Ideas
+## Topic: Natural Language Processing
+
+### Potential Projects
+1. **Context-aware summarization** - Creating summaries that adapt to different contexts
+2. **Multi-document synthesis** - Combining information from multiple sources
+3. **Real-time translation with tone preservation** - Maintaining emotional context in translations
+
+### Resources Needed
+- Access to GPT-4 API
+- High-quality training datasets
+- Computational resources for fine-tuning
+
+### Timeline
+- **Phase 1** (2 weeks): Literature review
+- **Phase 2** (4 weeks): Prototype development
+- **Phase 3** (3 weeks): Testing and validation
+
+### Key Questions
+- How can we measure "context awareness" quantitatively?
+- What are the ethical considerations for automated synthesis?
+- Is there a market for tone-preserving translation tools?`,
+                date: "2023-10-24",
+                summary: ""
+            },
+            {
+                id: 3,
+                title: "Shopping List",
+                content: `# Grocery Shopping List
+
+## Produce
+- [ ] Apples (5-6)
+- [ ] Bananas
+- [ ] Spinach
+- [ ] Tomatoes
+- [ ] Avocados (3)
+
+## Dairy
+- [ ] Milk
+- [ ] Greek yogurt
+- [ ] Cheese (cheddar)
+- [ ] Eggs (dozen)
+
+## Pantry
+- [ ] Coffee beans
+- [ ] Pasta
+- [ ] Olive oil
+- [ ] Cereal
+
+## Household
+- [ ] Dish soap
+- [ ] Paper towels
+- [ ] Laundry detergent
+
+## Notes
+> Try to buy organic when possible, especially for the Dirty Dozen list items.
+
+Stores to visit:
+1. Farmer's market for produce
+2. Local grocery for everything else`,
+                date: "2023-10-25",
+                summary: ""
+            }
+        ];
+
+        // State management
+        let notes = JSON.parse(localStorage.getItem('aiNotes')) || sampleNotes;
+        let currentNoteId = 1;
+        let isSummarizing = false;
+
+        // DOM Elements
+        const notesListEl = document.getElementById('notesList');
+        const noteTitleEl = document.getElementById('noteTitle');
+        const markdownEditorEl = document.getElementById('markdownEditor');
+        const previewContentEl = document.getElementById('previewContent');
+        const wordCountEl = document.getElementById('wordCount');
+        const newNoteBtn = document.getElementById('newNoteBtn');
+        const saveNoteBtn = document.getElementById('saveNoteBtn');
+        const summarizeBtn = document.getElementById('summarizeBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        const promptSelectEl = document.getElementById('promptSelect');
+        const aiPlaceholderEl = document.getElementById('aiPlaceholder');
+        const aiLoadingEl = document.getElementById('aiLoading');
+        const aiResultEl = document.getElementById('aiResult');
+
+        // Initialize the app
+        function init() {
+            renderNotesList();
+            loadNote(currentNoteId);
+            updatePreview();
+            updateWordCount();
+            
+            // Event listeners
+            markdownEditorEl.addEventListener('input', () => {
+                updatePreview();
+                updateWordCount();
+                saveNoteChanges();
+            });
+            
+            noteTitleEl.addEventListener('input', saveNoteChanges);
+            
+            newNoteBtn.addEventListener('click', createNewNote);
+            saveNoteBtn.addEventListener('click', saveNote);
+            summarizeBtn.addEventListener('click', summarizeNote);
+            generateBtn.addEventListener('click', generateSummary);
+            
+            // Auto-save every 10 seconds
+            setInterval(saveNoteChanges, 10000);
+        }
+
+        // Render notes list in sidebar
+        function renderNotesList() {
+            notesListEl.innerHTML = '';
+            
+            notes.forEach(note => {
+                const noteEl = document.createElement('div');
+                noteEl.className = `note-item ${note.id === currentNoteId ? 'active' : ''}`;
+                noteEl.innerHTML = `
+                    <div class="note-title">${note.title}</div>
+                    <div class="note-date">${formatDate(note.date)}</div>
+                `;
+                
+                noteEl.addEventListener('click', () => {
+                    currentNoteId = note.id;
+                    loadNote(note.id);
+                    renderNotesList();
+                });
+                
+                notesListEl.appendChild(noteEl);
+            });
+        }
+
+        // Load a note into the editor
+        function loadNote(id) {
+            const note = notes.find(n => n.id === id);
+            if (note) {
+                noteTitleEl.value = note.title;
+                markdownEditorEl.value = note.content;
+                updatePreview();
+                updateWordCount();
+                
+                // Load AI summary if exists
+                if (note.summary) {
+                    showAiResult(note.summary);
+                } else {
+                    showAiPlaceholder();
+                }
+            }
+        }
+
+        // Create a new note
+        function createNewNote() {
+            const newId = notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 1;
+            const newNote = {
+                id: newId,
+                title: "Untitled Note",
+                content: "# New Note\n\nStart writing here...",
+                date: new Date().toISOString().split('T')[0],
+                summary: ""
+            };
+            
+            notes.push(newNote);
+            currentNoteId = newId;
+            
+            renderNotesList();
+            loadNote(newId);
+            saveToLocalStorage();
+        }
+
+        // Save note changes
+        function saveNoteChanges() {
+            const note = notes.find(n => n.id === currentNoteId);
+            if (note) {
+                note.title = noteTitleEl.value;
+                note.content = markdownEditorEl.value;
+                note.date = new Date().toISOString().split('T')[0];
+                
+                saveToLocalStorage();
+                renderNotesList();
+            }
+        }
+
+        // Explicit save button handler
+        function saveNote() {
+            saveNoteChanges();
+            
+            // Show temporary feedback
+            const originalText = saveNoteBtn.innerHTML;
+            saveNoteBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            saveNoteBtn.style.backgroundColor = '#28a745';
+            saveNoteBtn.style.borderColor = '#28a745';
+            
+            setTimeout(() => {
+                saveNoteBtn.innerHTML = originalText;
+                saveNoteBtn.style.backgroundColor = '';
+                saveNoteBtn.style.borderColor = '';
+            }, 1500);
+        }
+
+        // Summarize the entire note
+        function summarizeNote() {
+            if (isSummarizing) return;
+            
+            promptSelectEl.value = 'summary';
+            generateSummary();
+        }
+
+        // Generate AI summary based on selected prompt
+        function generateSummary() {
+            if (isSummarizing) return;
+            
+            const note = notes.find(n => n.id === currentNoteId);
+            if (!note) return;
+            
+            const promptType = promptSelectEl.value;
+            const noteContent = note.content;
+            
+            if (noteContent.trim().length < 10) {
+                alert('Please write more content before generating a summary.');
+                return;
+            }
+            
+            isSummarizing = true;
+            showAiLoading();
+            
+            // Simulate AI processing delay
+            setTimeout(() => {
+                const summary = simulateAIResponse(noteContent, promptType);
+                
+                // Save summary to note
+                note.summary = summary;
+                saveToLocalStorage();
+                
+                showAiResult(summary);
+                isSummarizing = false;
+            }, 1500);
+        }
+
+        // Simulate AI response (in a real app, this would call an LLM API)
+        function simulateAIResponse(content, promptType) {
+            const wordCount = content.split(/\s+/).length;
+            const sentences = content.match(/[^.!?]+[.!?]+/g) || [];
+            const titleMatch = content.match(/^#\s+(.+)$/m);
+            const title = titleMatch ? titleMatch[1] : "the note";
+            
+            let summary = '';
+            
+            switch(promptType) {
+                case 'summary':
+                    summary = `<div class="ai-summary">
+                        <h3>Summary of "${title}"</h3>
+                        <p>This ${wordCount}-word note contains ${sentences.length} main points. The key themes include project updates, action items, and planning for future meetings. The most critical action items should be prioritized to ensure project timelines are met.</p>
+                    </div>`;
+                    break;
+                    
+                case 'bullet':
+                    summary = `<div class="ai-summary">
+                        <h3>Bullet Point Summary</h3>
+                        <div class="ai-key-points">
+                            <ul>
+                                <li>Document contains ${sentences.length} key sentences</li>
+                                <li>Primary focus is on project management and planning</li>
+                                <li>Multiple action items identified for follow-up</li>
+                                <li>Important deadlines and meetings scheduled</li>
+                                <li>Team collaboration and resource allocation discussed</li>
+                            </ul>
+                        </div>
+                    </div>`;
+                    break;
+                    
+                case 'action':
+                    const actionItems = content.match(/- \[( |x)\].+/g) || [];
+                    summary = `<div class="ai-summary">
+                        <h3>Extracted Action Items</h3>
+                        <div class="ai-key-points">
+                            <p>Found ${actionItems.length} action items in the note:</p>
+                            <ul>
+                                ${actionItems.slice(0, 5).map(item => `<li>${item.replace(/- \[( |x)\]/, '').trim()}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>`;
+                    break;
+                    
+                case 'tl;dr':
+                    summary = `<div class="ai-summary">
+                        <h3>TL;DR Version</h3>
+                        <p><strong>Too long; didn't read:</strong> This document outlines meeting notes with project updates, action items, and future planning. Key takeaways include progress on Project Alpha, resource needs for Project Beta, and upcoming deadlines that require attention.</p>
+                    </div>`;
+                    break;
+                    
+                case 'insights':
+                    summary = `<div class="ai-summary">
+                        <h3>AI-Generated Insights</h3>
+                        <div class="ai-key-points">
+                            <p>Based on analysis of this note, here are some insights:</p>
+                            <ul>
+                                <li>The tone suggests a productive and organized team meeting</li>
+                                <li>Clear delegation of tasks with specified deadlines</li>
+                                <li>Attention to both completed and pending items</li>
+                                <li>Consideration of client feedback in decision-making</li>
+                                <li>Balanced focus between current progress and future planning</li>
+                            </ul>
+                        </div>
+                    </div>`;
+                    break;
+                    
+                default:
+                    summary = `<div class="ai-summary">
+                        <h3>Summary</h3>
+                        <p>AI analysis of this ${wordCount}-word document reveals structured meeting notes with clear action items and project updates.</p>
+                    </div>`;
+            }
+            
+            return summary;
+        }
+
+        // Update markdown preview
+        function updatePreview() {
+            const markdown = markdownEditorEl.value;
+            previewContentEl.innerHTML = marked.parse(markdown);
+        }
+
+        // Update word count
+        function updateWordCount() {
+            const text = markdownEditorEl.value;
+            const wordCount = text.trim() === '' ? 0 : text.split(/\s+/).length;
+            const charCount = text.length;
+            wordCountEl.textContent = `Words: ${wordCount} | Chars: ${charCount}`;
+        }
+
+        // Show AI loading state
+        function showAiLoading() {
+            aiPlaceholderEl.style.display = 'none';
+            aiResultEl.style.display = 'none';
+            aiLoadingEl.style.display = 'block';
+        }
+
+        // Show AI result
+        function showAiResult(summary) {
+            aiPlaceholderEl.style.display = 'none';
+            aiLoadingEl.style.display = 'none';
+            aiResultEl.style.display = 'block';
+            aiResultEl.innerHTML = summary;
+        }
+
+        // Show AI placeholder
+        function showAiPlaceholder() {
+            aiLoadingEl.style.display = 'none';
+            aiResultEl.style.display = 'none';
+            aiPlaceholderEl.style.display = 'flex';
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        // Save notes to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('aiNotes', JSON.stringify(notes));
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+    
+    <!-- Markdown parsing library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>
